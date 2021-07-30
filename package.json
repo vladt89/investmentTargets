@@ -1,0 +1,23 @@
+{
+  "name": "investmenttargets",
+  "version": "1.0.0",
+  "description": "The project for analysing the possible targets for the investments.",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vladt89/investmentTargets.git"
+  },
+  "dependencies": {
+    "typescript": "^4.3.5"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vladt89/investmentTargets/issues"
+  },
+  "homepage": "https://github.com/vladt89/investmentTargets#readme"
+}
