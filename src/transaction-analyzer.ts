@@ -27,7 +27,7 @@ export class TransactionAnalyzer {
     }
 
     parseTransactionFiles() {
-        const csvFilePath = path.resolve(__dirname, '../transactionFiles/personal16.10.22.csv');
+        const csvFilePath = path.resolve(__dirname, '../transactionFiles/familyMay22-Sep22.csv'); //familyMay22-Sep22
         const headers = ['bookingDate', 'amount', 'sender', 'recipient', 'name', 'title', 'referenceNumber', 'currency'];
         const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
         parse(fileContent, {
@@ -43,6 +43,7 @@ export class TransactionAnalyzer {
 
     private analyze(transactions: Transaction[]) {
         const monthExpenses = new Map();
+        let topHighFoodAmounts = new Map<number, any>();
         for (const transaction of transactions) {
             const shop = transaction.title;
             if (this.skip(transaction, shop, SKIP_SHOPS_SHORT_NAMES)) {
@@ -59,16 +60,17 @@ export class TransactionAnalyzer {
                 let newExpenses = {
                     food: 0,
                     furniture: 0,
-                    carAndTransaport: 0,
+                    carAndTransport: 0,
                     other: 0,
                     sum: amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_FULL_NAMES, FOOD_SHOPS_SHORT_NAMES)) {
                     newExpenses.food = amountCents;
+                    topHighFoodAmounts.set(Math.abs(amountCents), {shop, date});
                 } else if (this.matchShop(shop, [], FURNITURE_SHOPS_SHORT_NAMES)) {
                     newExpenses.furniture = amountCents;
                 } else if (this.matchShop(shop, [], CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
-                    newExpenses.carAndTransaport = amountCents;
+                    newExpenses.carAndTransport = amountCents;
                 } else {
                     newExpenses.other = amountCents;
                 }
@@ -77,27 +79,45 @@ export class TransactionAnalyzer {
                 const updateExpenses = {
                     food: expenses.food,
                     furniture: expenses.furniture,
-                    carAndTransaport: expenses.carAndTransaport,
+                    carAndTransport: expenses.carAndTransport,
                     other: expenses.other,
                     sum: expenses.sum + amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_FULL_NAMES, FOOD_SHOPS_SHORT_NAMES)) {
                     updateExpenses.food = expenses.food + amountCents;
+                    topHighFoodAmounts = this.addToHighestAmounts(topHighFoodAmounts, Math.abs(amountCents), shop, date);
                 } else if (this.matchShop(shop, [], FURNITURE_SHOPS_SHORT_NAMES)) {
                     updateExpenses.furniture = expenses.furniture + amountCents;
                 } else if (this.matchShop(shop, [], CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
-                    updateExpenses.carAndTransaport = expenses.carAndTransaport + amountCents;
+                    updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
                 }
                 monthExpenses.set(month, updateExpenses);
-                const sum = updateExpenses.food + updateExpenses.furniture + updateExpenses.carAndTransaport + updateExpenses.other;
+                const sum = updateExpenses.food + updateExpenses.furniture + updateExpenses.carAndTransport + updateExpenses.other;
                 if (updateExpenses.sum != sum) {
                     console.error("Sum is wrong");
+                    return;
                 }
             }
         }
-        console.log(monthExpenses);
+        const resultTop = new Map([...topHighFoodAmounts].sort((a, b) => b[0] - a[0]));
+        console.log(resultTop);
+        // console.log(monthExpenses);
+    }
+
+    private addToHighestAmounts(inTopHighAmounts: Map<number, any>, amountCents: number, shop: string, date: Date) {
+        const newTopNighAmounts = inTopHighAmounts;
+        if (inTopHighAmounts.size == 0) {
+            newTopNighAmounts.set(amountCents, {shop, date});
+        } else {
+            for (const topHighAmount of inTopHighAmounts.keys()) {
+                if (amountCents > topHighAmount) {
+                    newTopNighAmounts.set(amountCents, {shop, date});
+                }
+            }
+        }
+        return newTopNighAmounts;
     }
 
     private skip(transaction: Transaction, shop: string, shopShortNames: string[]) {
