@@ -27,7 +27,7 @@ export class TransactionAnalyzer {
     }
 
     parseTransactionFiles() {
-        const csvFilePath = path.resolve(__dirname, '../transactionFiles/familyMay22-Sep22.csv'); //familyMay22-Sep22
+        const csvFilePath = path.resolve(__dirname, '../transactionFiles/personal16.10.22.csv'); //familyMay22-Sep22
         const headers = ['bookingDate', 'amount', 'sender', 'recipient', 'name', 'title', 'referenceNumber', 'currency'];
         const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
         parse(fileContent, {
@@ -102,8 +102,34 @@ export class TransactionAnalyzer {
             }
         }
         const resultTop = new Map([...topHighFoodAmounts].sort((a, b) => b[0] - a[0]));
-        console.log(resultTop);
+        // console.log(resultTop);
         // console.log(monthExpenses);
+        this.analyzeMonthlyExpenses(monthExpenses);
+    }
+
+    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>) {
+        let accountData = {expenses: []};
+        let polishedExpenses: any[] = [];
+        for (const expenses of monthExpenses) {
+            polishedExpenses.push({
+                month: expenses[0],
+                diagram: {
+                    food: this.printExpense(expenses[1].food) + " euros ("  + parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()) + "%)",
+                    furniture: this.printExpense(expenses[1].furniture) + " euros ("  + parseInt(((expenses[1].furniture / expenses[1].sum) * 100).toString())  + "%)",
+                    carAndTransport: this.printExpense(expenses[1].carAndTransport) + " euros ("  + parseInt(((expenses[1].carAndTransport / expenses[1].sum) * 100).toString())  + "%)",
+                    other: this.printExpense(expenses[1].other) + " euros (" + parseInt(((expenses[1].other / expenses[1].sum) * 100).toString())  + "%)",
+                    sum: this.printExpense(expenses[1].sum) + " euros",
+                }
+            });
+        }
+        console.log(polishedExpenses);
+    }
+
+    private printExpense(something: number) {
+        if (something == 0) {
+            return something.toString();
+        }
+        return something.toString().slice(1, something.toString().length - 2);
     }
 
     private addToHighestAmounts(inTopHighAmounts: Map<number, any>, amountCents: number, shop: string, date: Date) {
