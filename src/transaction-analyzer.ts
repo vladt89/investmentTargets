@@ -13,12 +13,13 @@ type Transaction = {
     currency: string;
 };
 
-const SKIP_SHOPS_SHORT_NAMES = ["ATM", "TIKHOMIROV", "WEINER"];
+const SKIP_SHOPS_SHORT_NAMES = ["ATM", "ROMANOV ALEKSANDR"];
 
 const FOOD_SHOPS_FULL_NAMES = ["ALEPA MALMINKARTANO", "LIDL HKI-KONALA", "PRISMA KANNELMAKI", "K-supermarket Konala"];
 const FOOD_SHOPS_SHORT_NAMES = ["ALEPA", "LIDL", "PRISMA", "K-supermarket", "K-market", "S-Market", "K-Citymarket"];
-const FURNITURE_SHOPS_SHORT_NAMES = ["IKEA", "K-Rauta"];
-const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL"];
+const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta"];
+const KIDS_EXPENSES_NAMES = ["Phoenix Partners Ky/LaughLearn"];
+const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS"];
 
 export class TransactionAnalyzer {
 
@@ -43,14 +44,15 @@ export class TransactionAnalyzer {
 
     private analyze(transactions: Transaction[]) {
         const monthExpenses = new Map();
-        let topHighFoodAmounts = new Map<number, any>();
+        let foodAmountsTOP = new Map<number, any>();
+        let otherAmountsTOP = new Map<number, any>();
         for (const transaction of transactions) {
             const shop = transaction.title;
             if (this.skip(transaction, shop, SKIP_SHOPS_SHORT_NAMES)) {
                 continue;
             }
             let date = new Date(Date.parse(transaction.bookingDate));
-            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            const month = this.getMonth(date);
             const amountCents = parseInt(transaction.amount.replace(",", ""));
             if (amountCents > 0) { // we don't care about the income as we want to analyze the expenses
                 continue;
@@ -59,70 +61,118 @@ export class TransactionAnalyzer {
             if (expenses == undefined) {
                 let newExpenses = {
                     food: 0,
-                    furniture: 0,
+                    houseAndFurniture: 0,
                     carAndTransport: 0,
+                    kids: 0,
                     other: 0,
                     sum: amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_FULL_NAMES, FOOD_SHOPS_SHORT_NAMES)) {
                     newExpenses.food = amountCents;
-                    topHighFoodAmounts.set(Math.abs(amountCents), {shop, date});
-                } else if (this.matchShop(shop, [], FURNITURE_SHOPS_SHORT_NAMES)) {
-                    newExpenses.furniture = amountCents;
+                    foodAmountsTOP.set(Math.abs(amountCents), {shop, date});
+                } else if (this.matchShop(shop, [], HOUSE_SHOPS_SHORT_NAMES)) {
+                    newExpenses.houseAndFurniture = amountCents;
                 } else if (this.matchShop(shop, [], CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     newExpenses.carAndTransport = amountCents;
+                } else if (this.matchShop(shop, [], KIDS_EXPENSES_NAMES)) {
+                    newExpenses.kids = amountCents;
                 } else {
                     newExpenses.other = amountCents;
+                    otherAmountsTOP.set(Math.abs(amountCents), {shop, date});
                 }
                 monthExpenses.set(month, newExpenses);
             } else {
                 const updateExpenses = {
                     food: expenses.food,
-                    furniture: expenses.furniture,
+                    houseAndFurniture: expenses.houseAndFurniture,
                     carAndTransport: expenses.carAndTransport,
+                    kids: expenses.kids,
                     other: expenses.other,
                     sum: expenses.sum + amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_FULL_NAMES, FOOD_SHOPS_SHORT_NAMES)) {
                     updateExpenses.food = expenses.food + amountCents;
-                    topHighFoodAmounts = this.addToHighestAmounts(topHighFoodAmounts, Math.abs(amountCents), shop, date);
-                } else if (this.matchShop(shop, [], FURNITURE_SHOPS_SHORT_NAMES)) {
-                    updateExpenses.furniture = expenses.furniture + amountCents;
+                    foodAmountsTOP = this.addToHighestAmounts(foodAmountsTOP, Math.abs(amountCents), shop, date);
+                } else if (this.matchShop(shop, [], HOUSE_SHOPS_SHORT_NAMES)) {
+                    updateExpenses.houseAndFurniture = expenses.houseAndFurniture + amountCents;
                 } else if (this.matchShop(shop, [], CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
+                } else if (this.matchShop(shop, [], KIDS_EXPENSES_NAMES)) {
+                    updateExpenses.kids = expenses.kids + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
+                    otherAmountsTOP = this.addToHighestAmounts(otherAmountsTOP, Math.abs(amountCents), shop, date);
                 }
                 monthExpenses.set(month, updateExpenses);
-                const sum = updateExpenses.food + updateExpenses.furniture + updateExpenses.carAndTransport + updateExpenses.other;
+                const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
+                    + updateExpenses.kids + updateExpenses.other;
                 if (updateExpenses.sum != sum) {
                     console.error("Sum is wrong");
                     return;
                 }
             }
         }
-        const resultTop = new Map([...topHighFoodAmounts].sort((a, b) => b[0] - a[0]));
-        // console.log(resultTop);
+        const topFood = new Map([...foodAmountsTOP].sort((a, b) => b[0] - a[0]));
+        const topOther = new Map([...otherAmountsTOP].sort((a, b) => b[0] - a[0]));
+        // console.log(foodAmountsTOP);
         // console.log(monthExpenses);
-        this.analyzeMonthlyExpenses(monthExpenses);
+        this.analyzeMonthlyExpenses(monthExpenses, topFood, topOther);
     }
 
-    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>) {
+    private getMonth(date: Date) {
+        return date.toLocaleString('default', {month: 'long', year: 'numeric'});
+    }
+
+    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>, topFood: Map<number, unknown>, topOther: Map<number, unknown>) {
         let accountData = {expenses: []};
         let polishedExpenses: any[] = [];
         for (const expenses of monthExpenses) {
+            const month = expenses[0];
             polishedExpenses.push({
-                month: expenses[0],
+                month,
                 diagram: {
-                    food: this.printExpense(expenses[1].food) + " euros ("  + parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()) + "%)",
-                    furniture: this.printExpense(expenses[1].furniture) + " euros ("  + parseInt(((expenses[1].furniture / expenses[1].sum) * 100).toString())  + "%)",
+                    //  this.printExpense(expenses[1].food) + " euros ("  + parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()) + "%)"
+                    food: {
+                        amount: this.printExpense(expenses[1].food),
+                        percentage: parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()),
+                        topTransactions: this.transactionsToJson(topFood, month)
+                    },
+                    houseAndFurniture: this.printExpense(expenses[1].houseAndFurniture) + " euros ("  + parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString())  + "%)",
                     carAndTransport: this.printExpense(expenses[1].carAndTransport) + " euros ("  + parseInt(((expenses[1].carAndTransport / expenses[1].sum) * 100).toString())  + "%)",
-                    other: this.printExpense(expenses[1].other) + " euros (" + parseInt(((expenses[1].other / expenses[1].sum) * 100).toString())  + "%)",
+                    kids: this.printExpense(expenses[1].kids) + " euros ("  + parseInt(((expenses[1].kids / expenses[1].sum) * 100).toString())  + "%)",
+                    other: {
+                        amount: this.printExpense(expenses[1].other),
+                        percentage: parseInt(((expenses[1].other / expenses[1].sum) * 100).toString()),
+                        topTransactions: this.transactionsToJson(topOther, month)
+                    },
                     sum: this.printExpense(expenses[1].sum) + " euros",
                 }
             });
         }
+        fs.writeFile("analyzeResults/test.json", JSON.stringify(polishedExpenses, null, 4), function(err) {
+            if (err) {
+                console.log(err);
+            }
+        });
         console.log(polishedExpenses);
+    }
+
+    private transactionsToJson(topTransactions: Map<number, any>, currentMonth: string) {
+        let result: any = {};
+        let i = 1;
+        for (const amount of topTransactions.keys()) {
+            const expense = topTransactions.get(amount);
+            const transactionDate = new Date(expense.date);
+            const month = this.getMonth(transactionDate);
+            if (month === currentMonth) {
+                // TODO make it more precise (cents are not in place)
+                result[i] = "spent " + amount.toString().slice(0, amount.toString().length - 2)
+                    + " euros in " + expense.shop + " on " + transactionDate.toDateString();
+                i++;
+            }
+            // console.log("");
+        }
+        return result;
     }
 
     private printExpense(something: number) {
