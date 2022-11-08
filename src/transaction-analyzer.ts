@@ -17,8 +17,10 @@ const SKIP_SHOPS_SHORT_NAMES = ["ATM", "ROMANOV ALEKSANDR"];
 
 const FOOD_SHOPS_FULL_NAMES = ["ALEPA MALMINKARTANO", "LIDL HKI-KONALA", "PRISMA KANNELMAKI", "K-supermarket Konala"];
 const FOOD_SHOPS_SHORT_NAMES = ["ALEPA", "LIDL", "PRISMA", "K-supermarket", "K-market", "S-Market", "K-Citymarket"];
-const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta"];
+const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta", "Helen Oy", "TIKHOMIROV V TAI WEINER C"];
 const KIDS_EXPENSES_NAMES = ["Phoenix Partners Ky/LaughLearn"];
+const SPORT_FOOD_FUN_NAMES = ["TALIHALLI", "ACTIVE GROUP RY", "VFI*Rami's Coffee Oy", "Inna Repo", "Asian Fusion Oy",
+    "SEIKKAILUPUISTO ZIPPY", "INTER RAVINTOLA"];
 const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS"];
 
 export class TransactionAnalyzer {
@@ -64,6 +66,7 @@ export class TransactionAnalyzer {
                     houseAndFurniture: 0,
                     carAndTransport: 0,
                     kids: 0,
+                    sportEatFun: 0,
                     other: 0,
                     sum: amountCents
                 };
@@ -76,6 +79,8 @@ export class TransactionAnalyzer {
                     newExpenses.carAndTransport = amountCents;
                 } else if (this.matchShop(shop, [], KIDS_EXPENSES_NAMES)) {
                     newExpenses.kids = amountCents;
+                } else if (this.matchShop(shop, [], SPORT_FOOD_FUN_NAMES)) {
+                    newExpenses.sportEatFun = amountCents;
                 } else {
                     newExpenses.other = amountCents;
                     otherAmountsTOP.set(Math.abs(amountCents), {shop, date});
@@ -87,6 +92,7 @@ export class TransactionAnalyzer {
                     houseAndFurniture: expenses.houseAndFurniture,
                     carAndTransport: expenses.carAndTransport,
                     kids: expenses.kids,
+                    sportEatFun: expenses.sportEatFun,
                     other: expenses.other,
                     sum: expenses.sum + amountCents
                 };
@@ -99,13 +105,15 @@ export class TransactionAnalyzer {
                     updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
                 } else if (this.matchShop(shop, [], KIDS_EXPENSES_NAMES)) {
                     updateExpenses.kids = expenses.kids + amountCents;
+                } else if (this.matchShop(shop, [], SPORT_FOOD_FUN_NAMES)) {
+                    updateExpenses.sportEatFun = expenses.sportEatFun + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
                     otherAmountsTOP = this.addToHighestAmounts(otherAmountsTOP, Math.abs(amountCents), shop, date);
                 }
                 monthExpenses.set(month, updateExpenses);
                 const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
-                    + updateExpenses.kids + updateExpenses.other;
+                    + updateExpenses.kids + updateExpenses.sportEatFun + updateExpenses.other;
                 if (updateExpenses.sum != sum) {
                     console.error("Sum is wrong");
                     return;
@@ -140,6 +148,7 @@ export class TransactionAnalyzer {
                     houseAndFurniture: this.printExpense(expenses[1].houseAndFurniture) + " euros ("  + parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString())  + "%)",
                     carAndTransport: this.printExpense(expenses[1].carAndTransport) + " euros ("  + parseInt(((expenses[1].carAndTransport / expenses[1].sum) * 100).toString())  + "%)",
                     kids: this.printExpense(expenses[1].kids) + " euros ("  + parseInt(((expenses[1].kids / expenses[1].sum) * 100).toString())  + "%)",
+                    sportEatFun: this.printExpense(expenses[1].sportEatFun) + " euros ("  + parseInt(((expenses[1].sportEatFun / expenses[1].sum) * 100).toString())  + "%)",
                     other: {
                         amount: this.printExpense(expenses[1].other),
                         percentage: parseInt(((expenses[1].other / expenses[1].sum) * 100).toString()),
