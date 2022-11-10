@@ -41,34 +41,45 @@ const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS", "PAR
 const TRAVEL_NAMES = ["VIKING LINE", "Tallink", "FINNLADY", "FINNLINES"]
 const HEALTH_NAMES = ["TERVEYSTALO MYYRMAKI", "Specsavers", "Malminkartanon apteekki"]
 
-const fileName = 'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
+const fileName = 'personal16.10.22'; //'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
 
 export class TransactionAnalyzer {
 
-    run() {
-        this.parseTransactionFiles();
+    async run() {
+        const fileContent = this.readFile();
+        const transactions = await this.parseTransactionFiles(fileContent);
+        const analysis = this.analyze(transactions);
+        if (analysis) {
+            this.saveFile(JSON.stringify(analysis, null, 4));
+        }
     }
 
-    parseTransactionFiles() {
-        const csvFilePath = path.resolve(__dirname, '../transactionFiles/' + fileName + ".csv");
+    async parseTransactionFiles(fileContent: string): Promise<Transaction[]> {
         const headers = ['bookingDate', 'amount', 'sender', 'recipient', 'name', 'title', 'referenceNumber', 'currency'];
-        const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
-        parse(fileContent, {
-            delimiter: ';',
-            columns: headers,
-        }, (error: CsvError | undefined, transactions: Transaction[]) => {
-            if (error) {
-                console.error(error);
-            }
-            this.analyze(transactions);
+        return new Promise((resolve, reject) => {
+            parse(fileContent, {
+                delimiter: ';',
+                columns: headers,
+            }, (error: CsvError | undefined, transactions: Transaction[]) => {
+                if (error) {
+                    console.error(error);
+                    reject(error);
+                }
+                resolve(transactions);
+            });
         });
     }
 
-    private analyze(transactions: Transaction[]) {
+    private readFile() {
+        const csvFilePath = path.resolve(__dirname, '../transactionFiles/' + fileName + ".csv");
+        return fs.readFileSync(csvFilePath, {encoding: 'utf-8'});
+    }
+
+    analyze(transactions: Transaction[]) {
         const monthExpenses = new Map<string, Expenses>();
-        let foodAmountsTOP = new Map<number, any>();
+        let foodAmountsTOP: any[] = [];
         let houseAndFurnitureAmountsTOP: any[] = [];
-        let otherAmountsTOP = new Map<number, any>();
+        let otherAmountsTOP: any[] = [];
         for (const transaction of transactions) {
             const shop = transaction.title;
             if (this.skip(transaction, shop, SKIP_SHOPS_SHORT_NAMES)) {
@@ -93,10 +104,10 @@ export class TransactionAnalyzer {
                     sum: amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_SHORT_NAMES)) {
-                    newExpenses["food"] = amountCents;
-                    foodAmountsTOP.set(Math.abs(amountCents), {shop, date});
+                    newExpenses.food = amountCents;
+                    foodAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
                 } else if (this.matchShop(shop, HOUSE_SHOPS_SHORT_NAMES)) {
-                    newExpenses["houseAndFurniture"] = amountCents;
+                    newExpenses.houseAndFurniture = amountCents;
                     houseAndFurnitureAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
                 } else if (this.matchShop(shop, CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     newExpenses.carAndTransport = amountCents;
@@ -108,7 +119,7 @@ export class TransactionAnalyzer {
                     newExpenses.sportEatFun = amountCents;
                 } else {
                     newExpenses.other = amountCents;
-                    otherAmountsTOP.set(Math.abs(amountCents), {shop, date});
+                    otherAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
                 }
                 monthExpenses.set(month, newExpenses);
             } else {
@@ -123,10 +134,10 @@ export class TransactionAnalyzer {
                     sum: expenses.sum + amountCents
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_SHORT_NAMES)) {
-                    updateExpenses["food"] = expenses["food"] + amountCents;
-                    foodAmountsTOP = this.addToHighestAmounts(foodAmountsTOP, Math.abs(amountCents), shop, date);
+                    updateExpenses.food = expenses.food + amountCents;
+                    foodAmountsTOP = this.addToHighestAmounts2(foodAmountsTOP, Math.abs(amountCents), shop, date);
                 } else if (this.matchShop(shop, HOUSE_SHOPS_SHORT_NAMES)) {
-                    updateExpenses["houseAndFurniture"] = expenses["houseAndFurniture"] + amountCents;
+                    updateExpenses.houseAndFurniture = expenses.houseAndFurniture + amountCents;
                     houseAndFurnitureAmountsTOP = this.addToHighestAmounts2(houseAndFurnitureAmountsTOP, Math.abs(amountCents), shop, date);
                 } else if (this.matchShop(shop, CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
@@ -138,7 +149,7 @@ export class TransactionAnalyzer {
                     updateExpenses.sportEatFun = expenses.sportEatFun + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
-                    otherAmountsTOP = this.addToHighestAmounts(otherAmountsTOP, Math.abs(amountCents), shop, date);
+                    otherAmountsTOP = this.addToHighestAmounts2(otherAmountsTOP, Math.abs(amountCents), shop, date);
                 }
                 monthExpenses.set(month, updateExpenses);
                 const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
@@ -149,20 +160,16 @@ export class TransactionAnalyzer {
                 }
             }
         }
-        const topFood = new Map([...foodAmountsTOP].sort((a, b) => b[0] - a[0]));
-        // const topHouseAndFurniture = new Map([...houseAndFurnitureAmountsTOP].sort((a, b) => b[0] - a[0]));
-        const topOther = new Map([...otherAmountsTOP].sort((a, b) => b[0] - a[0]));
-        // console.log(foodAmountsTOP);
-        // console.log(monthExpenses);
-        this.analyzeMonthlyExpenses(monthExpenses, topFood, houseAndFurnitureAmountsTOP, topOther);
+
+        return this.analyzeMonthlyExpenses(monthExpenses, foodAmountsTOP, houseAndFurnitureAmountsTOP, otherAmountsTOP);
     }
 
     private getMonth(date: Date) {
         return date.toLocaleString('default', {month: 'long', year: 'numeric'});
     }
 
-    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>, topFood: Map<number, unknown>,
-                                   topHouseAndFurniture: any[], topOther: Map<number, unknown>) {
+    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>, topFood: any[],
+                                   topHouseAndFurniture: any[], topOther: any[]): any[] {
         let accountData = {expenses: []};
         let polishedExpenses: any[] = [];
         for (const expenses of monthExpenses) {
@@ -177,7 +184,11 @@ export class TransactionAnalyzer {
                         topTransactions: this.transactionsToJson(topFood, month)
                     },
                     // this.printExpense(expenses[1].houseAndFurniture) + " euros ("  + parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString())  + "%)",
-                    houseAndFurniture:  this.getCategoryAnalysis(expenses, topHouseAndFurniture, month),
+                    houseAndFurniture: {
+                        amount: this.printExpense(expenses[1].houseAndFurniture),
+                        percentage: parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString()),
+                        topTransactions: this.transactionsToJson(topHouseAndFurniture, month)
+                    },
                     carAndTransport: this.printExpense(expenses[1].carAndTransport) + " euros ("  + parseInt(((expenses[1].carAndTransport / expenses[1].sum) * 100).toString())  + "%)",
                     kids: this.printExpense(expenses[1].kids) + " euros ("  + parseInt(((expenses[1].kids / expenses[1].sum) * 100).toString())  + "%)",
                     travel: this.printExpense(expenses[1].travel) + " euros ("  + parseInt(((expenses[1].travel / expenses[1].sum) * 100).toString())  + "%)",
@@ -191,12 +202,15 @@ export class TransactionAnalyzer {
                 }
             });
         }
-        fs.writeFile("analyzeResults/analysis_" + fileName + ".json", JSON.stringify(polishedExpenses, null, 4), function(err) {
+        return polishedExpenses;
+    }
+
+    private saveFile(result: string) {
+        fs.writeFile("analyzeResults/analysis_" + fileName + ".json", result, function (err) {
             if (err) {
                 console.log(err);
             }
         });
-        console.log(polishedExpenses);
     }
 
     private getCategoryAnalysis(expenses: [any, any], topHouseAndFurniture: any[], month: any) {
@@ -211,32 +225,13 @@ export class TransactionAnalyzer {
         return {
             amount: this.printExpense(cents),
             percentage: parseInt(((cents / expenses[1].sum) * 100).toString()),
-            topTransactions: this.transactionsToJson2(topHouseAndFurniture, month)
+            topTransactions: this.transactionsToJson(topHouseAndFurniture, month)
         };
     }
 
-    private transactionsToJson(topTransactions: Map<number, any>, currentMonth: string) {
-        let result: any = {};
-        let i = 1;
-        for (const amount of topTransactions.keys()) {
-            const expense = topTransactions.get(amount);
-            const transactionDate = new Date(expense.date);
-            const month = this.getMonth(transactionDate);
-            if (month === currentMonth) {
-                // TODO make it more precise (cents are not in place)
-                result[i] = "spent " + amount.toString().slice(0, amount.toString().length - 2)
-                    + " euros in " + expense.shop + " on " + transactionDate.toDateString();
-                i++;
-            }
-            // console.log("");
-        }
-        return result;
-    }
-
     // using array because Map misses some transactions because the key is the amount which can be repeating
-    private transactionsToJson2(topTransactions: any[], currentMonth: string) {
+    private transactionsToJson(topTransactions: any[], currentMonth: string) {
         let result: any = {};
-        // let i = 1;
         for (let i = 0; i < topTransactions.length; i++) {
             const topTransaction = topTransactions[i];
             const amount = topTransaction.amount;
@@ -247,9 +242,7 @@ export class TransactionAnalyzer {
                 // TODO make it more precise (cents are not in place)
                 result[i + 1] = "spent " + amount.toString().slice(0, amount.toString().length - 2)
                     + " euros in " + expense.shop + " on " + transactionDate.toDateString();
-                // i++;
             }
-            // console.log("");
         }
         return result;
     }
