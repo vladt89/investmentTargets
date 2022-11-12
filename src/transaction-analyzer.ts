@@ -174,49 +174,61 @@ export class TransactionAnalyzer {
         let polishedExpenses: any[] = [];
         for (const expenses of monthExpenses) {
             const month = expenses[0];
+            const monthSumma: number = expenses[1].sum;
+            const foodAmount: number = expenses[1].food;
+            const houseAndFurnitureAmount: number = expenses[1].houseAndFurniture;
+            const carAndTransportAmount = expenses[1].carAndTransport;
+            const travelAmount = expenses[1].travel;
+            const sportEatFunAmount = expenses[1].sportEatFun;
+            const otherAmount = expenses[1].other;
+            const kidsAmount = expenses[1].kids;
             polishedExpenses.push({
                 month,
-                sum: this.printExpense(expenses[1].sum) + " euros",
+                sum: this.centsToFloatEuros(monthSumma) + " euros",
                 categories: {
                     food: {
-                        amount: this.printExpense(expenses[1].food),
-                        percentage: Math.round(((expenses[1].food / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(foodAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(foodAmount, monthSumma),
                         topTransactions: this.transactionsToJson(topFood, month)
                     },
                     houseAndFurniture: {
-                        amount: this.printExpense(expenses[1].houseAndFurniture),
-                        percentage: Math.round(((expenses[1].houseAndFurniture / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(houseAndFurnitureAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(houseAndFurnitureAmount, monthSumma),
                         topTransactions: this.transactionsToJson(topHouseAndFurniture, month)
                     },
                     carAndTransport: {
-                        amount: this.printExpense(expenses[1].carAndTransport),
-                        percentage: Math.round(((expenses[1].carAndTransport / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(carAndTransportAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(carAndTransportAmount, monthSumma),
                         topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
                     },
                     kids: {
-                        amount: this.printExpense(expenses[1].kids),
-                        percentage: Math.round(((expenses[1].kids / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(kidsAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(kidsAmount, monthSumma),
                         topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
                     },
                     travel: {
-                        amount: this.printExpense(expenses[1].travel),
-                        percentage: Math.round(((expenses[1].travel / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(travelAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(travelAmount, monthSumma),
                         topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
                     },
                     sportEatFun: {
-                        amount: this.printExpense(expenses[1].sportEatFun),
-                        percentage: Math.round(((expenses[1].sportEatFun / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(sportEatFunAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(sportEatFunAmount, monthSumma),
                         topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
                     },
                     other: {
-                        amount: this.printExpense(expenses[1].other),
-                        percentage: Math.round(((expenses[1].other / expenses[1].sum) * 100) * 100) / 100,
+                        amount: this.centsToFloatEuros(otherAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(otherAmount, monthSumma),
                         topTransactions: this.transactionsToJson(topOther, month)
                     }
                 }
             });
         }
         return polishedExpenses;
+    }
+
+    private static calculatePercentage(categoryAmountCents: number, monthSummaCents: number) {
+        return Math.round(((categoryAmountCents / monthSummaCents) * 100) * 100) / 100;
     }
 
     private saveFile(result: string) {
@@ -239,7 +251,7 @@ export class TransactionAnalyzer {
             console.error("Month's expenses are not matching");
         }
         return {
-            amount: this.printExpense(cents),
+            amount: this.centsToFloatEuros(cents),
             percentage: parseInt(((cents / expenses[1].sum) * 100).toString()),
             topTransactions: this.transactionsToJson(topHouseAndFurniture, month)
         };
@@ -255,21 +267,19 @@ export class TransactionAnalyzer {
             const transactionDate = new Date(expense.date);
             const month = this.getMonth(transactionDate);
             if (month === currentMonth) {
-                // TODO make it more precise (cents are not in place)
-                result[i + 1] = "spent " + amount.toString().slice(0, amount.toString().length - 2)
+                result[i + 1] = "spent " + this.centsToFloatEuros(amount)
                     + " euros in " + expense.shop + " on " + transactionDate.toDateString();
             }
         }
         return result;
     }
 
-
-    private printExpense(amount: number) {
-        const strAmount = amount.toString();
+    centsToFloatEuros(amount: number) {
+        const strAmount = Math.abs(amount).toString();
         if (amount == 0) {
             return strAmount;
         }
-        const mainPart = strAmount.slice(1, strAmount.length - 2);
+        const mainPart = strAmount.slice(0, strAmount.length - 2);
         const restPart = strAmount.slice(strAmount.length - 2);
         return parseFloat(mainPart + "." + restPart);
     }

@@ -47,20 +47,20 @@ describe('Transaction analyzer', () => {
                     "amount": 70.97,
                     "percentage": 2.7,
                     "topTransactions": {
-                        "1": "spent 27 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
-                        "2": "spent 5 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
-                        "3": "spent 27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
-                        "4": "spent 10 euros in K-supermarket Konala on Mon Oct 10 2022"
+                        "1": "spent 27.37 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
+                        "2": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
+                        "3": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
+                        "4": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022"
                     }
                 },
                 "houseAndFurniture": {
                     "amount": 1018.72,
                     "percentage": 38.81,
                     "topTransactions": {
-                        "1": "spent 734 euros in Asunto Oy Kuparikartano on Wed Oct 05 2022",
+                        "1": "spent 734.8 euros in Asunto Oy Kuparikartano on Wed Oct 05 2022",
                         "2": "spent 173 euros in TIKHOMIROV V TAI WEINER C on Wed Oct 05 2022",
-                        "3": "spent 55 euros in Helen Oy on Wed Oct 05 2022",
-                        "4": "spent 55 euros in Helen Oy on Wed Oct 05 2022"
+                        "3": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
+                        "4": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022"
                     }
                 },
                 "kids": {
@@ -72,10 +72,10 @@ describe('Transaction analyzer', () => {
                     "amount": 13.97,
                     "percentage": 0.53,
                     "topTransactions": {
-                        "1": "spent  euros in APPLE.COM/BILL on Mon Oct 10 2022",
-                        "2": "spent  euros in APPLE.COM/BILL on Mon Oct 10 2022",
+                        "1": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
+                        "2": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
                         "3": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
-                        "4": "spent 5 euros in Motonet Helsinki, Konala on Mon Oct 10 2022"
+                        "4": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022"
                     }
                 },
                 "sportEatFun": {
@@ -151,5 +151,10 @@ describe('Transaction analyzer', () => {
         expect(100).toEqual(Math.round(((foodPercentage + houseAndFurniturePercentage + carAndTransportPercentage
             + kidsPercentage + travelPercentage + sportEatFunPercentage + otherPercentage) * 100) / 100)
         );
+    });
+
+    it('should verify transformation from cents to float euros', function () {
+        const centsToFloatEuros = transactionAnalyzer.centsToFloatEuros(2345);
+        expect(centsToFloatEuros).toEqual(23.45);
     });
 });
