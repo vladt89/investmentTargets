@@ -75,7 +75,7 @@ export class TransactionAnalyzer {
         return fs.readFileSync(csvFilePath, {encoding: 'utf-8'});
     }
 
-    analyze(transactions: Transaction[]) {
+    analyze(transactions: Transaction[]): any[] {
         const monthExpenses = new Map<string, Expenses>();
         let foodAmountsTOP: any[] = [];
         let houseAndFurnitureAmountsTOP: any[] = [];
@@ -156,7 +156,7 @@ export class TransactionAnalyzer {
                     + updateExpenses.kids + updateExpenses.travel + updateExpenses.sportEatFun + updateExpenses.other;
                 if (updateExpenses.sum != sum) {
                     console.error("Sum is wrong");
-                    return;
+                    throw new Error("Sum is wrong");
                 }
             }
         }
@@ -176,29 +176,43 @@ export class TransactionAnalyzer {
             const month = expenses[0];
             polishedExpenses.push({
                 month,
-                diagram: {
-                    //  this.printExpense(expenses[1].food) + " euros ("  + parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()) + "%)"
+                sum: this.printExpense(expenses[1].sum) + " euros",
+                categories: {
                     food: {
                         amount: this.printExpense(expenses[1].food),
-                        percentage: parseInt(((expenses[1].food / expenses[1].sum) * 100).toString()),
+                        percentage: Math.round(((expenses[1].food / expenses[1].sum) * 100) * 100) / 100,
                         topTransactions: this.transactionsToJson(topFood, month)
                     },
-                    // this.printExpense(expenses[1].houseAndFurniture) + " euros ("  + parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString())  + "%)",
                     houseAndFurniture: {
                         amount: this.printExpense(expenses[1].houseAndFurniture),
-                        percentage: parseInt(((expenses[1].houseAndFurniture / expenses[1].sum) * 100).toString()),
+                        percentage: Math.round(((expenses[1].houseAndFurniture / expenses[1].sum) * 100) * 100) / 100,
                         topTransactions: this.transactionsToJson(topHouseAndFurniture, month)
                     },
-                    carAndTransport: this.printExpense(expenses[1].carAndTransport) + " euros ("  + parseInt(((expenses[1].carAndTransport / expenses[1].sum) * 100).toString())  + "%)",
-                    kids: this.printExpense(expenses[1].kids) + " euros ("  + parseInt(((expenses[1].kids / expenses[1].sum) * 100).toString())  + "%)",
-                    travel: this.printExpense(expenses[1].travel) + " euros ("  + parseInt(((expenses[1].travel / expenses[1].sum) * 100).toString())  + "%)",
-                    sportEatFun: this.printExpense(expenses[1].sportEatFun) + " euros ("  + parseInt(((expenses[1].sportEatFun / expenses[1].sum) * 100).toString())  + "%)",
+                    carAndTransport: {
+                        amount: this.printExpense(expenses[1].carAndTransport),
+                        percentage: Math.round(((expenses[1].carAndTransport / expenses[1].sum) * 100) * 100) / 100,
+                        topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
+                    },
+                    kids: {
+                        amount: this.printExpense(expenses[1].kids),
+                        percentage: Math.round(((expenses[1].kids / expenses[1].sum) * 100) * 100) / 100,
+                        topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
+                    },
+                    travel: {
+                        amount: this.printExpense(expenses[1].travel),
+                        percentage: Math.round(((expenses[1].travel / expenses[1].sum) * 100) * 100) / 100,
+                        topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
+                    },
+                    sportEatFun: {
+                        amount: this.printExpense(expenses[1].sportEatFun),
+                        percentage: Math.round(((expenses[1].sportEatFun / expenses[1].sum) * 100) * 100) / 100,
+                        topTransactions: [] // this.transactionsToJson(topHouseAndFurniture, month)
+                    },
                     other: {
                         amount: this.printExpense(expenses[1].other),
-                        percentage: parseInt(((expenses[1].other / expenses[1].sum) * 100).toString()),
+                        percentage: Math.round(((expenses[1].other / expenses[1].sum) * 100) * 100) / 100,
                         topTransactions: this.transactionsToJson(topOther, month)
-                    },
-                    sum: this.printExpense(expenses[1].sum) + " euros",
+                    }
                 }
             });
         }
@@ -206,10 +220,12 @@ export class TransactionAnalyzer {
     }
 
     private saveFile(result: string) {
-        fs.writeFile("analyzeResults/analysis_" + fileName + ".json", result, function (err) {
+        const path = "analyzeResults/analysis_" + fileName + ".json";
+        fs.writeFile(path, result, function (err) {
             if (err) {
                 console.log(err);
             }
+            console.log("Analyzed file is saved to " + path);
         });
     }
 
@@ -248,11 +264,14 @@ export class TransactionAnalyzer {
     }
 
 
-    private printExpense(something: number) {
-        if (something == 0) {
-            return something.toString();
+    private printExpense(amount: number) {
+        const strAmount = amount.toString();
+        if (amount == 0) {
+            return strAmount;
         }
-        return something.toString().slice(1, something.toString().length - 2);
+        const mainPart = strAmount.slice(1, strAmount.length - 2);
+        const restPart = strAmount.slice(strAmount.length - 2);
+        return parseFloat(mainPart + "." + restPart);
     }
 
     private addToHighestAmounts(inTopHighAmounts: Map<number, any>, amountCents: number, shop: string, date: Date) {
