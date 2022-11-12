@@ -43,6 +43,8 @@ const HEALTH_NAMES = ["TERVEYSTALO MYYRMAKI", "Specsavers", "Malminkartanon apte
 
 const fileName = 'personal16.10.22'; //'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
 
+type TransactionDetails = { amount: number, shop: string, date: Date };
+
 export class TransactionAnalyzer {
 
     async run() {
@@ -77,9 +79,9 @@ export class TransactionAnalyzer {
 
     analyze(transactions: Transaction[]): any[] {
         const monthExpenses = new Map<string, Expenses>();
-        let foodAmountsTOP: any[] = [];
-        let houseAndFurnitureAmountsTOP: any[] = [];
-        let otherAmountsTOP: any[] = [];
+        let foodAmountsTOP: TransactionDetails[] = [];
+        let houseAndFurnitureAmountsTOP: TransactionDetails[] = [];
+        let otherAmountsTOP: TransactionDetails[] = [];
         for (const transaction of transactions) {
             const shop = transaction.title;
             if (this.skip(transaction, shop, SKIP_SHOPS_SHORT_NAMES)) {
@@ -105,10 +107,10 @@ export class TransactionAnalyzer {
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_SHORT_NAMES)) {
                     newExpenses.food = amountCents;
-                    foodAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
+                    foodAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 } else if (this.matchShop(shop, HOUSE_SHOPS_SHORT_NAMES)) {
                     newExpenses.houseAndFurniture = amountCents;
-                    houseAndFurnitureAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
+                    houseAndFurnitureAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 } else if (this.matchShop(shop, CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     newExpenses.carAndTransport = amountCents;
                 } else if (this.matchShop(shop, KIDS_EXPENSES_NAMES)) {
@@ -119,7 +121,7 @@ export class TransactionAnalyzer {
                     newExpenses.sportEatFun = amountCents;
                 } else {
                     newExpenses.other = amountCents;
-                    otherAmountsTOP.push({amount: Math.abs(amountCents), details: {shop, date}});
+                    otherAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 }
                 monthExpenses.set(month, newExpenses);
             } else {
@@ -135,10 +137,10 @@ export class TransactionAnalyzer {
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_SHORT_NAMES)) {
                     updateExpenses.food = expenses.food + amountCents;
-                    foodAmountsTOP = this.addToHighestAmounts2(foodAmountsTOP, Math.abs(amountCents), shop, date);
+                    foodAmountsTOP = this.addToHighestAmounts(foodAmountsTOP, Math.abs(amountCents), shop, date);
                 } else if (this.matchShop(shop, HOUSE_SHOPS_SHORT_NAMES)) {
                     updateExpenses.houseAndFurniture = expenses.houseAndFurniture + amountCents;
-                    houseAndFurnitureAmountsTOP = this.addToHighestAmounts2(houseAndFurnitureAmountsTOP, Math.abs(amountCents), shop, date);
+                    houseAndFurnitureAmountsTOP = this.addToHighestAmounts(houseAndFurnitureAmountsTOP, Math.abs(amountCents), shop, date);
                 } else if (this.matchShop(shop, CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
                 } else if (this.matchShop(shop, KIDS_EXPENSES_NAMES)) {
@@ -149,7 +151,7 @@ export class TransactionAnalyzer {
                     updateExpenses.sportEatFun = expenses.sportEatFun + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
-                    otherAmountsTOP = this.addToHighestAmounts2(otherAmountsTOP, Math.abs(amountCents), shop, date);
+                    otherAmountsTOP = this.addToHighestAmounts(otherAmountsTOP, Math.abs(amountCents), shop, date);
                 }
                 monthExpenses.set(month, updateExpenses);
                 const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
@@ -260,15 +262,21 @@ export class TransactionAnalyzer {
     // using array because Map misses some transactions because the key is the amount which can be repeating
     private transactionsToJson(topTransactions: any[], currentMonth: string) {
         let result: any = {};
-        for (let i = 0; i < topTransactions.length; i++) {
+        function compare(tr1: any, tr2: any) {
+            if (tr1.amount > tr2.amount) {
+                return -1;
+            }
+            return 0;
+        }
+        const sortedTransactions = topTransactions.sort(compare);
+        for (let i = 0; i < sortedTransactions.length; i++) {
             const topTransaction = topTransactions[i];
             const amount = topTransaction.amount;
-            const expense = topTransaction.details;
-            const transactionDate = new Date(expense.date);
+            const transactionDate = new Date(topTransaction.date);
             const month = this.getMonth(transactionDate);
             if (month === currentMonth) {
                 result[i + 1] = "spent " + this.centsToFloatEuros(amount)
-                    + " euros in " + expense.shop + " on " + transactionDate.toDateString();
+                    + " euros in " + topTransaction.shop + " on " + transactionDate.toDateString();
             }
         }
         return result;
@@ -284,30 +292,12 @@ export class TransactionAnalyzer {
         return parseFloat(mainPart + "." + restPart);
     }
 
-    private addToHighestAmounts(inTopHighAmounts: Map<number, any>, amountCents: number, shop: string, date: Date) {
-        const newTopNighAmounts = inTopHighAmounts;
-        if (inTopHighAmounts.size == 0) {
-            newTopNighAmounts.set(amountCents, {shop, date});
-        } else {
-            // for (const topHighAmount of inTopHighAmounts.keys()) {
-                // if (amountCents > topHighAmount) {
-                    newTopNighAmounts.set(amountCents, {shop, date});
-                // }
-            // }
-        }
-        return newTopNighAmounts;
-    }
-
-    private addToHighestAmounts2(inTopHighAmounts: {amount: number, details: any}[], amountCents: number, shop: string, date: Date) {
+    private addToHighestAmounts(inTopHighAmounts: TransactionDetails[], amountCents: number, shop: string, date: Date) {
         const newTopNighAmounts = inTopHighAmounts;
         if (inTopHighAmounts.length == 0) {
-            newTopNighAmounts.push({amount: amountCents, details: {shop, date}});
+            newTopNighAmounts.push({amount: amountCents, shop, date});
         } else {
-            // for (const inTopHighAmount of inTopHighAmounts) {
-            //     if (amountCents > inTopHighAmount.amount) {
-                    newTopNighAmounts.push({amount: amountCents, details: {shop, date}});
-                // }
-            // }
+            newTopNighAmounts.push({amount: amountCents, shop, date});
         }
         return newTopNighAmounts;
     }

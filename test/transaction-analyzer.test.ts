@@ -48,9 +48,9 @@ describe('Transaction analyzer', () => {
                     "percentage": 2.7,
                     "topTransactions": {
                         "1": "spent 27.37 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
-                        "2": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
-                        "3": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
-                        "4": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022"
+                        "2": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
+                        "3": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022",
+                        "4": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022"
                     }
                 },
                 "houseAndFurniture": {
@@ -72,10 +72,10 @@ describe('Transaction analyzer', () => {
                     "amount": 13.97,
                     "percentage": 0.53,
                     "topTransactions": {
-                        "1": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
-                        "2": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
-                        "3": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
-                        "4": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022"
+                        "1": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
+                        "2": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022",
+                        "3": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
+                        "4": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022"
                     }
                 },
                 "sportEatFun": {
