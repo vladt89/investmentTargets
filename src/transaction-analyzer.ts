@@ -269,13 +269,15 @@ export class TransactionAnalyzer {
             return 0;
         }
         const sortedTransactions = topTransactions.sort(compare);
+        let monthlyTransactionCount = 0;
         for (let i = 0; i < sortedTransactions.length; i++) {
             const topTransaction = topTransactions[i];
             const amount = topTransaction.amount;
             const transactionDate = new Date(topTransaction.date);
             const month = this.getMonth(transactionDate);
             if (month === currentMonth) {
-                result[i + 1] = "spent " + this.centsToFloatEuros(amount)
+                monthlyTransactionCount++;
+                result[monthlyTransactionCount] = "spent " + this.centsToFloatEuros(amount)
                     + " euros in " + topTransaction.shop + " on " + transactionDate.toDateString();
             }
         }
