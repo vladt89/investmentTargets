@@ -41,12 +41,16 @@ describe('Transaction analyzer', () => {
                 "carAndTransport": {
                     "amount": 55.6,
                     "percentage": 2.12,
-                    "topTransactions": []
+                    "transactions": {
+                        "1": "spent 50 euros in NESTE EXPRESS HEL MALMIN on Fri Oct 07 2022",
+                        "2": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022",
+                        "3": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022"
+                    }
                 },
                 "food": {
                     "amount": 70.97,
                     "percentage": 2.7,
-                    "topTransactions": {
+                    "transactions": {
                         "1": "spent 27.37 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
                         "2": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
                         "3": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022",
@@ -56,7 +60,7 @@ describe('Transaction analyzer', () => {
                 "houseAndFurniture": {
                     "amount": 1018.72,
                     "percentage": 38.81,
-                    "topTransactions": {
+                    "transactions": {
                         "1": "spent 734.8 euros in Asunto Oy Kuparikartano on Wed Oct 05 2022",
                         "2": "spent 173 euros in TIKHOMIROV V TAI WEINER C on Wed Oct 05 2022",
                         "3": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
@@ -66,12 +70,14 @@ describe('Transaction analyzer', () => {
                 "kids": {
                     "amount": 265.94,
                     "percentage": 10.13,
-                    "topTransactions": []
+                    "transactions": {
+                        "1": "spent 265.94 euros in Phoenix Partners Ky/LaughLearn on Mon Oct 31 2022"
+                    }
                 },
                 "other": {
                     "amount": 13.97,
                     "percentage": 0.53,
-                    "topTransactions": {
+                    "transactions": {
                         "1": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
                         "2": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022",
                         "3": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
@@ -81,12 +87,16 @@ describe('Transaction analyzer', () => {
                 "sportEatFun": {
                     "amount": 10.1,
                     "percentage": 0.38,
-                    "topTransactions": []
+                    "transactions": {
+                        "1": "spent 10.1 euros in VFI*Rami's Coffee Oy on Mon Oct 10 2022"
+                    }
                 },
                 "travel": {
                     "amount": 1189.68,
                     "percentage": 45.32,
-                    "topTransactions": []
+                    "transactions": {
+                        "1": "spent 1189.68 euros in FINNLINES OYJ on Mon Oct 10 2022"
+                    }
                 }
             },
             "month": "October 2022",
