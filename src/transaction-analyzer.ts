@@ -90,7 +90,7 @@ export class TransactionAnalyzer {
             let date = new Date(Date.parse(transaction.bookingDate));
             const month = this.getMonth(date);
             const amountCents = parseInt(transaction.amount.replace(",", ""));
-            if (amountCents > 0) { // we don't care about the income as we want to analyze the expenses
+            if (amountCents > 0) { // NOTE: we don't care about the income as we want to analyze the expenses
                 continue;
             }
             let expenses: Expenses | undefined = monthExpenses.get(month);
@@ -137,10 +137,10 @@ export class TransactionAnalyzer {
                 };
                 if (this.matchShop(shop, FOOD_SHOPS_SHORT_NAMES)) {
                     updateExpenses.food = expenses.food + amountCents;
-                    foodAmountsTOP = this.addToHighestAmounts(foodAmountsTOP, Math.abs(amountCents), shop, date);
+                    foodAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 } else if (this.matchShop(shop, HOUSE_SHOPS_SHORT_NAMES)) {
                     updateExpenses.houseAndFurniture = expenses.houseAndFurniture + amountCents;
-                    houseAndFurnitureAmountsTOP = this.addToHighestAmounts(houseAndFurnitureAmountsTOP, Math.abs(amountCents), shop, date);
+                    houseAndFurnitureAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 } else if (this.matchShop(shop, CAR_TRANSPORT_SHOPS_SHORT_NAMES)) {
                     updateExpenses.carAndTransport = expenses.carAndTransport + amountCents;
                 } else if (this.matchShop(shop, KIDS_EXPENSES_NAMES)) {
@@ -151,7 +151,7 @@ export class TransactionAnalyzer {
                     updateExpenses.sportEatFun = expenses.sportEatFun + amountCents;
                 } else {
                     updateExpenses.other = expenses.other + amountCents;
-                    otherAmountsTOP = this.addToHighestAmounts(otherAmountsTOP, Math.abs(amountCents), shop, date);
+                    otherAmountsTOP.push({amount: Math.abs(amountCents), shop, date});
                 }
                 monthExpenses.set(month, updateExpenses);
                 const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
@@ -170,20 +170,23 @@ export class TransactionAnalyzer {
         return date.toLocaleString('default', {month: 'long', year: 'numeric'});
     }
 
-    private analyzeMonthlyExpenses(monthExpenses: Map<any, any>, topFood: any[],
+    private analyzeMonthlyExpenses(monthExpenses: Map<any, Expenses>, topFood: any[],
                                    topHouseAndFurniture: any[], topOther: any[]): any[] {
         let accountData = {expenses: []};
         let polishedExpenses: any[] = [];
-        for (const expenses of monthExpenses) {
-            const month = expenses[0];
-            const monthSumma: number = expenses[1].sum;
-            const foodAmount: number = expenses[1].food;
-            const houseAndFurnitureAmount: number = expenses[1].houseAndFurniture;
-            const carAndTransportAmount = expenses[1].carAndTransport;
-            const travelAmount = expenses[1].travel;
-            const sportEatFunAmount = expenses[1].sportEatFun;
-            const otherAmount = expenses[1].other;
-            const kidsAmount = expenses[1].kids;
+        for (const month of monthExpenses.keys()) {
+            const expenses = monthExpenses.get(month);
+            if (!expenses) {
+                throw new Error("Error: expenses for " + month + " are not defined");
+            }
+            const monthSumma: number = expenses.sum;
+            const foodAmount: number = expenses.food;
+            const houseAndFurnitureAmount: number = expenses.houseAndFurniture;
+            const carAndTransportAmount = expenses.carAndTransport;
+            const travelAmount = expenses.travel;
+            const sportEatFunAmount = expenses.sportEatFun;
+            const otherAmount = expenses.other;
+            const kidsAmount = expenses.kids;
             polishedExpenses.push({
                 month,
                 sum: this.centsToFloatEuros(monthSumma) + " euros",
@@ -292,16 +295,6 @@ export class TransactionAnalyzer {
         const mainPart = strAmount.slice(0, strAmount.length - 2);
         const restPart = strAmount.slice(strAmount.length - 2);
         return parseFloat(mainPart + "." + restPart);
-    }
-
-    private addToHighestAmounts(inTopHighAmounts: TransactionDetails[], amountCents: number, shop: string, date: Date) {
-        const newTopNighAmounts = inTopHighAmounts;
-        if (inTopHighAmounts.length == 0) {
-            newTopNighAmounts.push({amount: amountCents, shop, date});
-        } else {
-            newTopNighAmounts.push({amount: amountCents, shop, date});
-        }
-        return newTopNighAmounts;
     }
 
     private skip(transaction: Transaction, shop: string, shopShortNames: string[]) {
