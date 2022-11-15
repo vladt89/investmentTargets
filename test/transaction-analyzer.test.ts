@@ -57,6 +57,11 @@ describe('Transaction analyzer', () => {
                         "4": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022"
                     }
                 },
+                "health": {
+                    "amount": 0,
+                    "percentage": 0,
+                    "transactions": {}
+                },
                 "houseAndFurniture": {
                     "amount": 1018.72,
                     "percentage": 38.81,
@@ -66,6 +71,11 @@ describe('Transaction analyzer', () => {
                         "3": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
                         "4": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022"
                     }
+                },
+                "insurance": {
+                    "amount": 0,
+                    "percentage": 0,
+                    "transactions": {}
                 },
                 "kids": {
                     "amount": 265.94,

@@ -281,7 +281,7 @@ export class TransactionAnalyzer {
     }
 
     private static calculatePercentage(categoryAmountCents: number, monthSummaCents: number) {
-        return Math.round(((categoryAmountCents / monthSummaCents) * 100) * 100) / 100;
+        return Math.round((Math.abs(categoryAmountCents / monthSummaCents) * 100) * 100) / 100;
     }
 
     private saveFile(result: string) {
