@@ -36,82 +36,92 @@ describe('Transaction analyzer', () => {
         const transactions = await transactionAnalyzer.parseTransactionFiles(fileContent);
         // exercise
         const analyzeResult = transactionAnalyzer.analyze(transactions);
-        expect(analyzeResult).toEqual([{
-            "categories": {
-                "carAndTransport": {
-                    "amount": 55.6,
-                    "percentage": 2.12,
-                    "transactions": {
-                        "1": "spent 50 euros in NESTE EXPRESS HEL MALMIN on Fri Oct 07 2022",
-                        "2": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022",
-                        "3": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022"
+        expect(analyzeResult).toEqual({
+            "averageMonthExpenses": "2624.98 euros",
+            "monthlyExpenses": [{
+                "categories": {
+                    "carAndTransport": {
+                        "amount": 55.6,
+                        "percentage": 2.12,
+                        "transactions": {
+                            "1": "spent 50 euros in NESTE EXPRESS HEL MALMIN on Fri Oct 07 2022",
+                            "2": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022",
+                            "3": "spent 2.8 euros in HSL Mobiili on Fri Oct 07 2022",
+                            "on average": "spent 18.53 euros"
+                        }
+                    },
+                    "food": {
+                        "amount": 70.97,
+                        "percentage": 2.7,
+                        "transactions": {
+                            "1": "spent 27.37 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
+                            "2": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
+                            "3": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022",
+                            "4": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
+                            "on average": "spent 17.74 euros"
+                        }
+                    },
+                    "health": {
+                        "amount": 0,
+                        "percentage": 0,
+                        "transactions": {}
+                    },
+                    "houseAndFurniture": {
+                        "amount": 1018.72,
+                        "percentage": 38.81,
+                        "transactions": {
+                            "1": "spent 734.8 euros in Asunto Oy Kuparikartano on Wed Oct 05 2022",
+                            "2": "spent 173 euros in TIKHOMIROV V TAI WEINER C on Wed Oct 05 2022",
+                            "3": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
+                            "4": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
+                            "on average": "spent 254.68 euros"
+                        }
+                    },
+                    "insurance": {
+                        "amount": 0,
+                        "percentage": 0,
+                        "transactions": {}
+                    },
+                    "kids": {
+                        "amount": 265.94,
+                        "percentage": 10.13,
+                        "transactions": {
+                            "1": "spent 265.94 euros in Phoenix Partners Ky/LaughLearn on Mon Oct 31 2022",
+                            "on average": "spent 265.94 euros"
+                        }
+                    },
+                    "other": {
+                        "amount": 13.97,
+                        "percentage": 0.53,
+                        "transactions": {
+                            "1": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
+                            "2": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022",
+                            "3": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
+                            "4": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
+                            "on average": "spent 3.49 euros"
+                        }
+                    },
+                    "sportEatFun": {
+                        "amount": 10.1,
+                        "percentage": 0.38,
+                        "transactions": {
+                            "1": "spent 10.1 euros in VFI*Rami's Coffee Oy on Mon Oct 10 2022",
+                            "on average": "spent 10.1 euros"
+                        }
+                    },
+                    "travel": {
+                        "amount": 1189.68,
+                        "percentage": 45.32,
+                        "transactions": {
+                            "1": "spent 1189.68 euros in FINNLINES OYJ on Mon Oct 10 2022",
+                            "on average": "spent 1189.68 euros"
+                        }
                     }
                 },
-                "food": {
-                    "amount": 70.97,
-                    "percentage": 2.7,
-                    "transactions": {
-                        "1": "spent 27.37 euros in ALEPA MALMINKARTANO on Tue Oct 11 2022",
-                        "2": "spent 27.37 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022",
-                        "3": "spent 10.96 euros in K-supermarket Konala on Mon Oct 10 2022",
-                        "4": "spent 5.27 euros in ALEPA MALMINKARTANO on Mon Oct 10 2022"
-                    }
-                },
-                "health": {
-                    "amount": 0,
-                    "percentage": 0,
-                    "transactions": {}
-                },
-                "houseAndFurniture": {
-                    "amount": 1018.72,
-                    "percentage": 38.81,
-                    "transactions": {
-                        "1": "spent 734.8 euros in Asunto Oy Kuparikartano on Wed Oct 05 2022",
-                        "2": "spent 173 euros in TIKHOMIROV V TAI WEINER C on Wed Oct 05 2022",
-                        "3": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022",
-                        "4": "spent 55.46 euros in Helen Oy on Wed Oct 05 2022"
-                    }
-                },
-                "insurance": {
-                    "amount": 0,
-                    "percentage": 0,
-                    "transactions": {}
-                },
-                "kids": {
-                    "amount": 265.94,
-                    "percentage": 10.13,
-                    "transactions": {
-                        "1": "spent 265.94 euros in Phoenix Partners Ky/LaughLearn on Mon Oct 31 2022"
-                    }
-                },
-                "other": {
-                    "amount": 13.97,
-                    "percentage": 0.53,
-                    "transactions": {
-                        "1": "spent 6 euros in Espoon kaupunki on Mon Oct 10 2022",
-                        "2": "spent 5.99 euros in Motonet Helsinki, Konala on Mon Oct 10 2022",
-                        "3": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022",
-                        "4": "spent 0.99 euros in APPLE.COM/BILL on Mon Oct 10 2022"
-                    }
-                },
-                "sportEatFun": {
-                    "amount": 10.1,
-                    "percentage": 0.38,
-                    "transactions": {
-                        "1": "spent 10.1 euros in VFI*Rami's Coffee Oy on Mon Oct 10 2022"
-                    }
-                },
-                "travel": {
-                    "amount": 1189.68,
-                    "percentage": 45.32,
-                    "transactions": {
-                        "1": "spent 1189.68 euros in FINNLINES OYJ on Mon Oct 10 2022"
-                    }
-                }
-            },
-            "month": "October 2022",
-            "sum": "2624.98 euros"
-        }]);
+                "month": "October 2022",
+                "sum": "2624.98 euros"}
+            ]
+        });
     });
 
     it('should verify that the sum is correct for 1 month', async () => {
@@ -144,11 +154,11 @@ describe('Transaction analyzer', () => {
             "2022/10/10;-1189,68;FI57 1040 3500 4294 14;;;FINNLINES OYJ;;EUR";
         const transactions = await transactionAnalyzer.parseTransactionFiles(fileContent);
         // exercise
-        const analyzeResult: any[] = transactionAnalyzer.analyze(transactions);
+        const analyzeResult = transactionAnalyzer.analyze(transactions);
         // verify
         expect(analyzeResult).toBeDefined();
-        expect(analyzeResult.length).toEqual(1);
-        const categories = analyzeResult[0].categories;
+        expect(analyzeResult.monthlyExpenses.length).toEqual(1);
+        const categories = analyzeResult.monthlyExpenses[0].categories;
         const foodAmount = categories.food.amount;
         const houseAndFurnitureAmount = categories.houseAndFurniture.amount;
         const carAndTransportAmount = categories.carAndTransport.amount;
@@ -159,7 +169,7 @@ describe('Transaction analyzer', () => {
 
         const sum = foodAmount + houseAndFurnitureAmount + carAndTransportAmount + kidsAmount + travelAmount
             + sportEatFunAmount + otherAmount;
-        expect(analyzeResult[0].sum).toEqual(Math.round(sum * 100) / 100 + " euros");
+        expect(analyzeResult.monthlyExpenses[0].sum).toEqual(Math.round(sum * 100) / 100 + " euros");
 
         const foodPercentage = categories.food.percentage;
         const houseAndFurniturePercentage = categories.houseAndFurniture.percentage;

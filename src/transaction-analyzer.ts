@@ -28,31 +28,33 @@ interface Expenses {
 
 const SKIP_SHOPS_SHORT_NAMES = [
     "ATM",
-    "ROMANOV ALEKSANDR",
+    "ROMANOV ALEKSANDR", "Foundation For Student Housing",
     "Autodoc AG", // Vasya
     "VERKKOKAUPPA.COM MYYMALAT", // monitor
-    "Paysend EU" // personal
+    "Paysend EU", "Every Day Use OP", "Mw A Shutova" // personal
 ];
 
 const FOOD_SHOPS_SHORT_NAMES = ["ALEPA", "LIDL", "PRISMA", "K-supermarket", "K-market", "S-Market", "K-Citymarket",
-    "K market", "MINIMARKET", "S MARKET", "LENTA", "EDEKA", "PEREKRESTOK"];
+    "K market", "MINIMARKET", "S MARKET", "LENTA", "EDEKA", "PEREKRESTOK", "DISAS"];
 const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta", "Helen Oy", "TIKHOMIROV V TAI WEINER C",
     "Elisa Oyj"];
 const KIDS_FAMILY_NAMES = ["Phoenix Partners Ky/LaughLearn", "MUSTI JA MIRRI", "VETKLINIKA VOLF", "EVGENIJA KRUGLOVA",
-    "TIKHOMIROV VLADIMIR", "PERHEKESKUS MARIA RY"];
+    "TIKHOMIROV VLADIMIR", "PERHEKESKUS MARIA RY", "Seikkailupuisto Korkee"];
 const SPORT_FOOD_FUN_NAMES = ["TALIHALLI", "ACTIVE GROUP RY", "VFI*Rami's Coffee Oy", "Inna Repo", "Asian Fusion Oy",
     "SEIKKAILUPUISTO ZIPPY", "INTER RAVINTOLA", "INTER PIZZA", "Electrobike", "XXL", "RESTAURANT", "PoplaCandy",
     "ABC", "BK KONALA", "CAFE", "CITY OF HELSINKI", "Wilhelm Breimaier", "Intelinvest", "RAVINTOLA", "PIZZERIA",
     "Eat Poke Hki Oy", "HIEKKA BEACHSPOT OY", "HSBIKEDISCO", "DIGICLOUDTR", "Taste Creator Oy", "HESBURGER",
-    "OCR Factory", "IGELS", "TONI PITKANEN"];
+    "OCR Factory", "IGELS", "TONI PITKANEN", "Kiipeilyvisio Oy", "FREE MOTION", "BAR", "VIHTI SKI CENTE",
+    "MOTHER INDIA"];
 const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS", "PARKMAN", "Parking", "TANKSTELLE",
     "AIMO PARK", "Teboil", "SHELL", "LansiAuto", "ODNO KOLESO", "TANKSTATION", "Aral Station", "TRAFICOM"];
-const TRAVEL_NAMES = ["VIKING LINE", "Tallink", "FINNLADY", "FINNLINES", "Hotel"];
+const TRAVEL_NAMES = ["VIKING LINE", "Tallink", "FINNLADY", "FINNLINES", "Hotel", "BOLT", "PAYTRAIL",
+    "DIRECTF", "MOTEL", "RENT A CAR", "RAILW"];
 const HEALTH_NAMES = ["TERVEYSTALO MYYRMAKI", "Specsavers", "Malminkartanon apteekki", "CENTR KORREKCII ZRENIYA",
-    "APTEKA"];
+    "APTEKA", "SILMAASEMA"];
 const INSURANCE_NAMES = ["POHJOLA VAKUUTUS OY", "IF VAKUUTUS"];
 
-const fileName = 'personal1.06.21-31.12.21'; //'personal16.10.22'; //'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
+const fileName = 'personal1.01.22-30.11.22'; //'personal1.06.21-31.12.21'; //'personal16.10.22'; //'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
 
 type TransactionDetails = { amount: number, shop: string, date: Date };
 
@@ -88,7 +90,7 @@ export class TransactionAnalyzer {
         return fs.readFileSync(csvFilePath, {encoding: 'utf-8'});
     }
 
-    analyze(transactions: Transaction[]): any[] {
+    analyze(transactions: Transaction[]): {averageMonthExpenses: string, monthlyExpenses: any[]} {
         const monthExpenses = new Map<string, Expenses>();
         let foodTransactions: TransactionDetails[] = [];
         let houseAndFurnitureTransactions: TransactionDetails[] = [];
@@ -200,8 +202,7 @@ export class TransactionAnalyzer {
                                    travelTransactions: TransactionDetails[],
                                    sportsEatFunTransactions: TransactionDetails[],
                                    healthTransactions: TransactionDetails[],
-                                   otherTransactions: TransactionDetails[]): any[] {
-        let accountData = {expenses: []};
+                                   otherTransactions: TransactionDetails[]): {averageMonthExpenses: string, monthlyExpenses: any[]} {
         let polishedExpenses: any[] = [];
         let allFileSumma = 0;
         for (const month of monthExpenses.keys()) {
@@ -277,7 +278,10 @@ export class TransactionAnalyzer {
         const averageMonthExpenses = Math.round((this.centsToFloatEuros(allFileSumma) / monthCount) * 100) / 100 + " euros";
         console.log(averageMonthExpenses + " is average monthly expenses during the period of " + monthCount + " month(s)");
 
-        return polishedExpenses;
+        return {
+            averageMonthExpenses,
+            monthlyExpenses: polishedExpenses
+        };
     }
 
     private static calculatePercentage(categoryAmountCents: number, monthSummaCents: number) {
@@ -320,17 +324,23 @@ export class TransactionAnalyzer {
             return 0;
         }
         const sortedTransactions = transactions.sort(compare);
+        let transactionsSum = 0;
         let monthlyTransactionCount = 0;
         for (let i = 0; i < sortedTransactions.length; i++) {
             const topTransaction = transactions[i];
-            const amount = topTransaction.amount;
             const transactionDate = new Date(topTransaction.date);
             const month = this.getMonth(transactionDate);
             if (month === currentMonth) {
                 monthlyTransactionCount++;
+                const amount = topTransaction.amount;
+                transactionsSum += amount;
                 result[monthlyTransactionCount] = "spent " + this.centsToFloatEuros(amount)
                     + " euros in " + topTransaction.shop + " on " + transactionDate.toDateString();
             }
+        }
+        if (transactionsSum > 0) {
+            const averageTransactionAmount = Math.floor(transactionsSum / monthlyTransactionCount);
+            result["on average"] = "spent " + this.centsToFloatEuros(averageTransactionAmount) + " euros";
         }
         return result;
     }
