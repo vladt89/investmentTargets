@@ -22,6 +22,7 @@ interface Expenses {
     travel: number,
     sportEatFun: number,
     health: number,
+    invest: number,
     other: number,
     sum: number
 }
@@ -31,30 +32,83 @@ const SKIP_SHOPS_SHORT_NAMES = [
     "ROMANOV ALEKSANDR", "Foundation For Student Housing",
     "Autodoc AG", // Vasya
     "VERKKOKAUPPA.COM MYYMALAT", // monitor
-    "Paysend EU", "Every Day Use OP", "Mw A Shutova" // personal
+    "Paysend EU", "Every Day Use OP", "Mw A Shutova", "Valery Selenin", // personal
+    "NH COLLECTION MILANO CITY", // Milan trip
+    "PIHLAJALINNA HA", //Partio insurance should cover
+    "AUTODOC", "KLM", // returned
+    "TIKHOMIROV VLADIMIR",
+    "Interactive Brokers", "Bitstamp" // investments, which are not expenses as such
 ];
 
 const FOOD_SHOPS_SHORT_NAMES = ["ALEPA", "LIDL", "PRISMA", "K-supermarket", "K-market", "S-Market", "K-Citymarket",
-    "K market", "MINIMARKET", "S MARKET", "LENTA", "EDEKA", "PEREKRESTOK", "DISAS"];
+    "K market", "MINIMARKET", "S MARKET", "LENTA", "EDEKA", "PEREKRESTOK", "DISAS",
+    "Netto", "KAUFLAND", "ALDI", // german food shops
+    "RIMI", // estonian food shop
+];
 const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta", "Helen Oy", "TIKHOMIROV V TAI WEINER C",
-    "Elisa Oyj"];
+    "Elisa Oyj", "BAUHAUS", "MIKKO UGOLNIKOV", "Gigantti",
+    "JARKKO MIKAEL", // Sofa
+    "DNA", // internet
+    "BILTEMA",
+    "AURORANLINNA", // renting
+];
 const KIDS_FAMILY_NAMES = ["Phoenix Partners Ky/LaughLearn", "MUSTI JA MIRRI", "VETKLINIKA VOLF", "EVGENIJA KRUGLOVA",
-    "TIKHOMIROV VLADIMIR", "PERHEKESKUS MARIA RY", "Seikkailupuisto Korkee"];
+    "PERHEKESKUS MARIA RY", "Seikkailupuisto Korkee", "HIIHTOSEURA",
+    "HOPLOP", "Voimisteluseura",
+    "TWI SERVICES OY", // Russian visa
+    "CHESS GALAXY",
+    "HELSINGIN UIMARIT",
+    "Christina Weiner FI",
+    "HGIN KAUPUNKI/ TALPA/LASKUTUS", // продленка
+];
 const SPORT_FOOD_FUN_NAMES = ["TALIHALLI", "ACTIVE GROUP RY", "VFI*Rami's Coffee Oy", "Inna Repo", "Asian Fusion Oy",
     "SEIKKAILUPUISTO ZIPPY", "INTER RAVINTOLA", "INTER PIZZA", "Electrobike", "XXL", "RESTAURANT", "PoplaCandy",
     "ABC", "BK KONALA", "CAFE", "CITY OF HELSINKI", "Wilhelm Breimaier", "Intelinvest", "RAVINTOLA", "PIZZERIA",
     "Eat Poke Hki Oy", "HIEKKA BEACHSPOT OY", "HSBIKEDISCO", "DIGICLOUDTR", "Taste Creator Oy", "HESBURGER",
     "OCR Factory", "IGELS", "TONI PITKANEN", "Kiipeilyvisio Oy", "FREE MOTION", "BAR", "VIHTI SKI CENTE",
-    "MOTHER INDIA"];
+    "MOTHER INDIA", "LAGER 157", "BURGER KING", "Messila Maailma", "NATURA VIVA", "Subway", "FINNKINO",
+    "RESTORAN", "SHERLOCK HOLMES", "NOODLE STORY OY", "DONER", "Boneless", "POPLATEK", "UIMA", "IRONMAN",
+    "EO SPACE OY", // School challenge RU
+    "ZWIFT",
+    "CYCLECLASSI", // rent bike
+    "Cycle Classic", // rent bike
+    "Rush", "Serena",
+    "MCDONALDS",
+    "KRISPY KEBAB",
+    "STADIUM",
+    "Aalto Group Oy", // Varuste.net
+];
 const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS", "PARKMAN", "Parking", "TANKSTELLE",
-    "AIMO PARK", "Teboil", "SHELL", "LansiAuto", "ODNO KOLESO", "TANKSTATION", "Aral Station", "TRAFICOM"];
+    "AIMO PARK", "Teboil", "SHELL", "LansiAuto", "ODNO KOLESO", "TANKSTATION", "Aral Station", "TRAFICOM", "SHELL",
+    "LIPPUAUTOMAATIT", "Motonet", "AMZN Mktp US*HY5EI2EQ0",
+    "HELSINKI/KYMP/PYSÄKÖINTI", // paring fine
+    "AUTOBAHN TANK", "PETROL",
+    "TAXI", "EASYPARK", "BOLT",
+    "VOBA BECKUM-LIPPSTADT",
+    "JORMA AULIS HALON", // bought skoda
+];
 const TRAVEL_NAMES = ["VIKING LINE", "Tallink", "FINNLADY", "FINNLINES", "Hotel", "BOLT", "PAYTRAIL",
-    "DIRECTF", "MOTEL", "RENT A CAR", "RAILW"];
+    "DIRECTF", "MOTEL", "RENT A CAR", "RAILW", "CORENDONAIRLINES", "FINNAIR", "SAMUEL LINDBLOM",
+    "Milano Portello", 
+    "Trustly Group AB", // finnair
+    "Scandic Skarholmen FO", "SCANDLINES DEUTSCHLAND GM", "CINDERELLA",
+    "VASAMUSEET", "VISIT VADSTENA",
+    "OERESUNDSBROEN", // Denmark-Sweden bridge
+    "BBR ORGANIZASYON REKLAM", "ALANYA TELEFERIK", "ANTALYA", "ISTANBUL", "ALANYA",
+    "BOOKING",
+    "Ilia Tumkin", // travel (for parents) or money for Russia
+    "LUFTHANSA",
+    "LuxExpress", "BALTICSHUTTLE", "ECOLINES", // buses to Russia
+    "VIKINGLINE", "ECKERO LINE", "DIRECT FERR", // ferries to Tallinn
+    "AIRBNB",
+    "DBVERTRIEBG A" // Deutsche Bahn
+];
 const HEALTH_NAMES = ["TERVEYSTALO MYYRMAKI", "Specsavers", "Malminkartanon apteekki", "CENTR KORREKCII ZRENIYA",
-    "APTEKA", "SILMAASEMA"];
+    "APTEKA", "SILMAASEMA", "HUS", "APOTHEKE", "ELAINSAIRAALA", "Apteekki", "Myyrmannin apt", "Fysio Sakura"];
 const INSURANCE_NAMES = ["POHJOLA VAKUUTUS OY", "IF VAKUUTUS"];
+const INVEST_NAMES = ["Interactive Brokers", "Bitstamp"];
 
-const fileName = 'personal1.01.22-30.11.22'; //'personal1.06.21-31.12.21'; //'personal16.10.22'; //'personalMay22-Sep22'; //'personal16.10.22'; //familyMay22-Sep22
+const fileName = 'myAccount1.1.24-27.09.24';
 
 type TransactionDetails = { amount: number, shop: string, date: Date };
 
@@ -70,7 +124,7 @@ export class TransactionAnalyzer {
     }
 
     async parseTransactionFiles(fileContent: string): Promise<Transaction[]> {
-        const headers = ['bookingDate', 'amount', 'sender', 'recipient', 'name', 'title', 'referenceNumber', 'currency'];
+        const headers = ['bookingDate', 'amount', 'sender', 'recipient', 'name', 'title', 'referenceNumber', 'currency', 'empty'];
         return new Promise((resolve, reject) => {
             parse(fileContent, {
                 delimiter: ';',
@@ -100,19 +154,33 @@ export class TransactionAnalyzer {
         let travelTransactions: TransactionDetails[] = [];
         let sportsEatFunTransactions: TransactionDetails[] = [];
         let healthTransactions: TransactionDetails[] = [];
+        let investTransactions: TransactionDetails[] = [];
         let otherTransactions: TransactionDetails[] = [];
         for (const transaction of transactions) {
             const shop = transaction.title;
             if (this.skip(transaction, shop, SKIP_SHOPS_SHORT_NAMES)) {
                 continue;
             }
-            const bookingDate = transaction.bookingDate;
+            let bookingDate = transaction.bookingDate;
             if (bookingDate === "Reserved") { // skip transactions that were not completed
                 continue;
             }
+            if (bookingDate.includes('.')) {
+                const split = bookingDate.split('.');
+                bookingDate = split[2] + "/" + split[1] + "/" + split[0];
+            }
             let date = new Date(Date.parse(bookingDate));
             const month = this.getMonth(date);
-            const amountCents = parseInt(transaction.amount.replace(",", ""));
+            if (transaction.amount.includes(",")) {
+                const commaSplit = transaction.amount.split(",");
+                transaction.amount = transaction.amount.replace(",", "");
+                if (commaSplit[1].length == 1) {
+                    transaction.amount = transaction.amount + "0";
+                }
+            } else {
+                transaction.amount = transaction.amount + "00";
+            }
+            const amountCents = parseInt(transaction.amount);
             if (amountCents > 0) { // NOTE: we don't care about the income as we want to analyze the expenses
                 continue;
             }
@@ -128,6 +196,7 @@ export class TransactionAnalyzer {
                     travel: 0,
                     sportEatFun: 0,
                     health: 0,
+                    invest: 0,
                     other: 0,
                     sum: amountCents
                 };
@@ -141,6 +210,7 @@ export class TransactionAnalyzer {
                     travel: expenses.travel,
                     sportEatFun: expenses.sportEatFun,
                     health: expenses.health,
+                    invest: expenses.invest,
                     other: expenses.other,
                     sum: expenses.sum + amountCents
                 };
@@ -170,6 +240,9 @@ export class TransactionAnalyzer {
             } else if (this.matchShop(shop, HEALTH_NAMES)) {
                 updateExpenses.health = (expenses ? expenses.health : 0) + amountCents;
                 healthTransactions.push(transactionDetails);
+            } else if (this.matchShop(shop, INVEST_NAMES)) {
+                updateExpenses.invest = (expenses ? expenses.invest : 0) + amountCents;
+                investTransactions.push(transactionDetails);
             } else {
                 updateExpenses.other = (expenses ? expenses.other : 0) + amountCents;
                 otherTransactions.push(transactionDetails);
@@ -177,7 +250,7 @@ export class TransactionAnalyzer {
             monthExpenses.set(month, updateExpenses);
             const sum = updateExpenses.food + updateExpenses.houseAndFurniture + updateExpenses.carAndTransport
                 + updateExpenses.kids + updateExpenses.insurance + updateExpenses.travel + updateExpenses.sportEatFun
-                + updateExpenses.health + updateExpenses.other;
+                + updateExpenses.health + updateExpenses.invest + updateExpenses.other;
             if (updateExpenses.sum != sum) {
                 console.error("Sum is wrong");
                 throw new Error("Sum is wrong");
@@ -186,7 +259,7 @@ export class TransactionAnalyzer {
 
         return this.analyzeMonthlyExpenses(monthExpenses, foodTransactions, houseAndFurnitureTransactions,
             carAndTransportTransactions, kidsTransactions, insuranceTransactions, travelTransactions,
-            sportsEatFunTransactions, healthTransactions, otherTransactions);
+            sportsEatFunTransactions, healthTransactions, investTransactions, otherTransactions);
     }
 
     private getMonth(date: Date) {
@@ -202,6 +275,7 @@ export class TransactionAnalyzer {
                                    travelTransactions: TransactionDetails[],
                                    sportsEatFunTransactions: TransactionDetails[],
                                    healthTransactions: TransactionDetails[],
+                                   investTransactions: TransactionDetails[],
                                    otherTransactions: TransactionDetails[]): {averageMonthExpenses: string, monthlyExpenses: any[]} {
         let polishedExpenses: any[] = [];
         let allFileSumma = 0;
@@ -220,6 +294,7 @@ export class TransactionAnalyzer {
             const otherAmount = expenses.other;
             const kidsAmount = expenses.kids;
             const insuranceAmount = expenses.insurance;
+            const investAmount = expenses.invest;
             const healthAmount = expenses.health;
             polishedExpenses.push({
                 month,
@@ -265,6 +340,11 @@ export class TransactionAnalyzer {
                         percentage: TransactionAnalyzer.calculatePercentage(healthAmount, monthSumma),
                         transactions: this.transactionsToJson(healthTransactions, month)
                     },
+                    invest: {
+                        amount: this.centsToFloatEuros(investAmount),
+                        percentage: TransactionAnalyzer.calculatePercentage(investAmount, monthSumma),
+                        transactions: this.transactionsToJson(investTransactions, month)
+                    },
                     other: {
                         amount: this.centsToFloatEuros(otherAmount),
                         percentage: TransactionAnalyzer.calculatePercentage(otherAmount, monthSumma),
@@ -275,11 +355,14 @@ export class TransactionAnalyzer {
         }
 
         const monthCount = monthExpenses.size;
-        const averageMonthExpenses = Math.round((this.centsToFloatEuros(allFileSumma) / monthCount) * 100) / 100 + " euros";
-        console.log(averageMonthExpenses + " is average monthly expenses during the period of " + monthCount + " month(s)");
+        const averageMonthExpenses = Math.round((this.centsToFloatEuros(allFileSumma) / monthCount) * 100) / 100;
+        const averageMonthExpensesStr = averageMonthExpenses + " euros";
+        console.log(averageMonthExpensesStr + " is average monthly expenses during the period of " + monthCount + " month(s)");
+        const entirePeriodExpenses = averageMonthExpenses * monthCount;
+        console.log("Spent during entire period: " + entirePeriodExpenses);
 
         return {
-            averageMonthExpenses,
+            averageMonthExpenses: averageMonthExpensesStr,
             monthlyExpenses: polishedExpenses
         };
     }
