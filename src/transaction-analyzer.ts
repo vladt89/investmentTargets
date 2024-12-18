@@ -37,7 +37,8 @@ const SKIP_SHOPS_SHORT_NAMES = [
     "PIHLAJALINNA HA", //Partio insurance should cover
     "AUTODOC", "KLM", // returned
     "TIKHOMIROV VLADIMIR",
-    "Interactive Brokers", "Bitstamp" // investments, which are not expenses as such
+    "Interactive Brokers", "Bitstamp", // investments, which are not expenses as such
+    "Lahitapiola Rahoitus", // Valentin
 ];
 
 const FOOD_SHOPS_SHORT_NAMES = ["ALEPA", "LIDL", "PRISMA", "K-supermarket", "K-market", "S-Market", "K-Citymarket",
@@ -51,6 +52,8 @@ const HOUSE_SHOPS_SHORT_NAMES = ["Asunto Oy Kuparikartano", "IKEA", "K-Rauta", "
     "DNA", // internet
     "BILTEMA",
     "AURORANLINNA", // renting
+    "HOUSINGANY", // Berlin renting
+    "KUMAR RAJU", // bed
 ];
 const KIDS_FAMILY_NAMES = ["Phoenix Partners Ky/LaughLearn", "MUSTI JA MIRRI", "VETKLINIKA VOLF", "EVGENIJA KRUGLOVA",
     "PERHEKESKUS MARIA RY", "Seikkailupuisto Korkee", "HIIHTOSEURA",
@@ -60,6 +63,7 @@ const KIDS_FAMILY_NAMES = ["Phoenix Partners Ky/LaughLearn", "MUSTI JA MIRRI", "
     "HELSINGIN UIMARIT",
     "Christina Weiner FI",
     "HGIN KAUPUNKI/ TALPA/LASKUTUS", // продленка
+    "BADMINTON CLUB", 
 ];
 const SPORT_FOOD_FUN_NAMES = ["TALIHALLI", "ACTIVE GROUP RY", "VFI*Rami's Coffee Oy", "Inna Repo", "Asian Fusion Oy",
     "SEIKKAILUPUISTO ZIPPY", "INTER RAVINTOLA", "INTER PIZZA", "Electrobike", "XXL", "RESTAURANT", "PoplaCandy",
@@ -77,6 +81,10 @@ const SPORT_FOOD_FUN_NAMES = ["TALIHALLI", "ACTIVE GROUP RY", "VFI*Rami's Coffee
     "KRISPY KEBAB",
     "STADIUM",
     "Aalto Group Oy", // Varuste.net
+    "Helsingin kaupunki Pirkko", // Swimming pool
+    "ROCKTHESPORT", // Marathon
+    "Starcart", // watch brother
+    "MCD", // MacDuck
 ];
 const CAR_TRANSPORT_SHOPS_SHORT_NAMES = ["NESTE", "HSL", "HELPPOKATSASTUS", "PARKMAN", "Parking", "TANKSTELLE",
     "AIMO PARK", "Teboil", "SHELL", "LansiAuto", "ODNO KOLESO", "TANKSTATION", "Aral Station", "TRAFICOM", "SHELL",
@@ -101,14 +109,21 @@ const TRAVEL_NAMES = ["VIKING LINE", "Tallink", "FINNLADY", "FINNLINES", "Hotel"
     "LuxExpress", "BALTICSHUTTLE", "ECOLINES", // buses to Russia
     "VIKINGLINE", "ECKERO LINE", "DIRECT FERR", // ferries to Tallinn
     "AIRBNB",
-    "DBVERTRIEBG A" // Deutsche Bahn
+    "DBVERTRIEBG A", // Deutsche Bahn
+    "WIZZ AIR",
+    "AIRBALTIC",
+    "elron", // Estonian train
+    "KALEVSPA",
+    "GKD GLOBAL FZE LLC", // Russian e-visa
+    "RUSTRAVEL",
 ];
 const HEALTH_NAMES = ["TERVEYSTALO MYYRMAKI", "Specsavers", "Malminkartanon apteekki", "CENTR KORREKCII ZRENIYA",
-    "APTEKA", "SILMAASEMA", "HUS", "APOTHEKE", "ELAINSAIRAALA", "Apteekki", "Myyrmannin apt", "Fysio Sakura"];
+    "APTEKA", "SILMAASEMA", "HUS", "APOTHEKE", "ELAINSAIRAALA", "Apteekki", "Myyrmannin apt", "Fysio Sakura",
+    "apteek"];
 const INSURANCE_NAMES = ["POHJOLA VAKUUTUS OY", "IF VAKUUTUS"];
 const INVEST_NAMES = ["Interactive Brokers", "Bitstamp"];
 
-const fileName = 'myAccount1.1.24-27.09.24';
+const fileName = 'myAccount1.11.24-30.11.24';
 
 type TransactionDetails = { amount: number, shop: string, date: Date };
 
